@@ -5,7 +5,7 @@ Implementation the paper [A Decomposable Attention Model for Natural Language In
 The same model can be used for generic sentence pair classification tasks (e.g. paraphrase detection), in addition to natural language inference.
 
 ## Data
-Stanford Natural Language Inference (SNLI) dataset can be downloaded from http://nlp.stanford/projects/snli/
+Stanford Natural Language Inference (SNLI) dataset can be downloaded from http://nlp.stanford.edu/projects/snli/
 
 Pre-trained GloVe embeddings can be downloaded from http://nlp.stanford.edu/projects/glove/
 
