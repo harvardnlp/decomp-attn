@@ -1,6 +1,6 @@
 # Decomposable Attention Model for Sentence Pair Classification
 
-Implementation the paper [A Decomposable Attention Model for Natural Language Inference](https://arxiv.org/abs/1606.01933). Parikh et al. 2016 EMNLP 2016.
+Implementation the paper [A Decomposable Attention Model for Natural Language Inference](https://arxiv.org/abs/1606.01933). Parikh et al. EMNLP 2016.
 
 The same model can be used for generic sentence pair classification tasks (e.g. paraphrase detection), in addition to natural language inference.
 
@@ -19,7 +19,7 @@ python preprocess.py --srcfile path-to-sent1-train --targetfile path-to-sent2-tr
 --labeltestfile path-to-label-test --outputfile data/entail --glove path-to-glove
 ```
 This will create the data hdf5 files. Vocabulary is based on the pretrained Glove embeddings,
-with `path-to-glove` being the path to the pretrained Glove word vecs (i.e. `glove.840B.300d.txt`
+with `path-to-glove` being the path to the pretrained Glove word vecs (i.e. the `glove.840B.300d.txt`
 file)
 
 For natural language inference sent1 can be the premise and sent2 can be the hypothesis.
@@ -38,6 +38,7 @@ th train.lua -data_file path-to-train -val_data_file path-to-val -test_data_file
 -pre_word_vecs path-to-word-vecs
 ```
 Here `path-to-word-vecs` is the hdf5 file created from running `get_pretrain_vecs.py`.
+
 You can add `-gpuid 1` to use the (first) GPU.
 
 The model essentially replicates the results of Parikh et al. (2016). The main difference is that
