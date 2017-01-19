@@ -30,16 +30,13 @@ cmd:option('-param_init', 0.01, [[Parameters are initialized over uniform distri
                                (-param_init, param_init)]])
 cmd:option('-optim', 'adagrad', [[Optimization method. Possible options are: 
                               sgd (vanilla SGD), adagrad, adadelta, adam]])
-  cmd:option('-learning_rate', 0.05, [[Starting learning rate. If adagrad/adadelta/adam is used, 
+cmd:option('-learning_rate', 0.05, [[Starting learning rate. If adagrad/adadelta/adam is used, 
                                 then this is the global learning rate.]])
-cmd:option('-max_grad_norm', 5, [[If the norm of the gradient vector exceeds this renormalize it
-                               to have the norm equal to max_grad_norm]])
 cmd:option('-pre_word_vecs', 'glove.hdf5', [[If a valid path is specified, then this will load 
                                       pretrained word embeddings (hdf5 file)]])
 cmd:option('-fix_word_vecs', 1, [[If = 1, fix word embeddings]])
-cmd:option('-max_batch_l', 32, [[If blank, then it will infer the max batch size from validation 
-				   data. You should only use this if your validation set uses a different
-				   batch size in the preprocessing step]])
+cmd:option('-max_batch_l', '', [[If blank, then it will infer the max batch size from the
+				   data.]])
 cmd:option('-gpuid', -1, [[Which gpu to use. -1 = use CPU]])
 cmd:option('-print_every', 1000, [[Print stats after this many batches]])
 cmd:option('-seed', 3435, [[Seed for random initialization]])
@@ -94,8 +91,8 @@ function train(train_data, valid_data)
   end
   
   -- prototypes for gradients so there is no need to clone
-  word_vecs1_grad_proto = torch.zeros(opt.max_batch_l, opt.max_sent_l, opt.word_vec_size)
-  word_vecs2_grad_proto = torch.zeros(opt.max_batch_l, opt.max_sent_l, opt.word_vec_size)
+  word_vecs1_grad_proto = torch.zeros(opt.max_batch_l, opt.max_sent_l_src, opt.word_vec_size)
+  word_vecs2_grad_proto = torch.zeros(opt.max_batch_l, opt.max_sent_l_targ, opt.word_vec_size)
   
   if opt.gpuid >= 0 then
     cutorch.setDevice(opt.gpuid)                        
@@ -158,19 +155,8 @@ function train(train_data, valid_data)
 	end	
       end	 
       
-      local grad_norm = 0
-      for i = 1, #grad_params do
-	grad_norm = grad_norm + grad_params[i]:norm()^2
-      end
-      grad_norm = grad_norm^0.5
-      
-      -- Shrink norm and update params
-      local param_norm = 0
-      local shrinkage = opt.max_grad_norm / grad_norm
+      -- Update params
       for j = 1, #grad_params do
-	if shrinkage < 1 then
-	  grad_params[j]:mul(shrinkage)
-	end
 	if opt.optim == 'adagrad' then
 	  adagrad_step(params[j], grad_params[j], layer_etas[j], optStates[j])
 	elseif opt.optim == 'adadelta' then
@@ -180,11 +166,7 @@ function train(train_data, valid_data)
 	else
 	  params[j]:add(grad_params[j]:mul(-opt.learning_rate))       
 	end
-	if j ~= 2 and j ~= 6 then
-	  param_norm = param_norm + params[j]:norm()^2
-	end	    
       end	 
-      param_norm = param_norm^0.5
 
       params[2]:copy(params[1])
       if opt.share_params == 1 then
@@ -206,15 +188,11 @@ function train(train_data, valid_data)
       if i % opt.print_every == 0 then
 	local stats = string.format('Epoch: %d, Batch: %d/%d, Batch size: %d, LR: %.4f, ',
 				    epoch, i, data:size(), batch_l, opt.learning_rate)
-	stats = stats .. string.format('NLL: %.4f, Acc: %.4f, |Param|: %.2f, |GParam|: %.2f, ',
-				       train_loss/train_sents, train_num_correct/train_sents,
-				       param_norm, grad_norm)
+	stats = stats .. string.format('NLL: %.4f, Acc: %.4f, ',
+				       train_loss/train_sents, train_num_correct/train_sents)
 	stats = stats .. string.format('Training: %d total tokens/sec',
 				       (num_words_target+num_words_source) / time_taken)
 	print(stats)
-      end
-      if i % 200 == 0 then
-	collectgarbage()
       end
     end
     return train_loss, train_sents, train_num_correct
@@ -283,10 +261,6 @@ function main()
     print('using CUDA on GPU ' .. opt.gpuid .. '...')
     require 'cutorch'
     require 'cunn'
-    if opt.cudnn == 1 then
-      print('loading cudnn...')
-      require 'cudnn'
-    end      
     cutorch.setDevice(opt.gpuid)
     cutorch.manualSeed(opt.seed)      
   end
@@ -299,22 +273,21 @@ function main()
   test_data = data.new(opt, opt.test_data_file)
   print('done!')
   print(string.format('Source vocab size: %d, Target vocab size: %d',
-		      valid_data.source_size, valid_data.target_size))   
-  opt.max_sent_l_src = valid_data.source:size(2)
-  opt.max_sent_l_targ = valid_data.target:size(2)
-  opt.max_sent_l = math.max(opt.max_sent_l_src, opt.max_sent_l_targ)
+		      train_data.source_size, train_data.target_size))   
+  opt.max_sent_l_src = train_data.source:size(2)
+  opt.max_sent_l_targ = train_data.target:size(2)
   if opt.max_batch_l == '' then
-    opt.max_batch_l = valid_data.batch_l:max()
+    opt.max_batch_l = train_data.batch_l:max()
   end
   
   print(string.format('Source max sent len: %d, Target max sent len: %d',
-		      valid_data.source:size(2), valid_data.target:size(2)))   
+		      train_data.source:size(2), train_data.target:size(2)))   
   
   -- Build model
-  word_vecs_enc1 = nn.LookupTable(valid_data.source_size, opt.word_vec_size)
-  word_vecs_enc2 = nn.LookupTable(valid_data.target_size, opt.word_vec_size)
+  word_vecs_enc1 = nn.LookupTable(train_data.source_size, opt.word_vec_size)
+  word_vecs_enc2 = nn.LookupTable(train_data.target_size, opt.word_vec_size)
   sent_encoder = make_sent_encoder(opt.word_vec_size, opt.hidden_size,
-				   valid_data.label_size, opt.dropout)	 
+				   train_data.label_size, opt.dropout)	 
 
   disc_criterion = nn.ClassNLLCriterion()
   disc_criterion.sizeAverage = false
