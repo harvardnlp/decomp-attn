@@ -53,5 +53,9 @@ th predict.lua -sent1_file path-to-sent1 -sent2_file path-to-sent2 -model path-t
 This will output the predictions to `pred.txt`. `path-to-word-dict` and `path-to-label-dict` are the
 *.dict files created from running `preprocess.py`
 
+## Contact
+
+Written and maintained by <a href="http://yoon.io">Yoon Kim</a>.
+
 ## Licence
 MIT
