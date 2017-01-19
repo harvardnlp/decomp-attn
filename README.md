@@ -1,6 +1,6 @@
 # Decomposable Attention Model for Sentence Pair Classification
 
-Implementation the paper [A Decomposable Attention Model for Natural Language Inference](https://arxiv.org/abs/1606.01933). Parikh et al. EMNLP 2016.
+Implementation of the paper [A Decomposable Attention Model for Natural Language Inference](https://arxiv.org/abs/1606.01933). Parikh et al. EMNLP 2016.
 
 The same model can be used for generic sentence pair classification tasks (e.g. paraphrase detection), in addition to natural language inference.
 
