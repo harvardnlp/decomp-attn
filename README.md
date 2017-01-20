@@ -26,7 +26,7 @@ For natural language inference sent1 can be the premise and sent2 can be the hyp
 
 Now run:
 ```
-python get_pretrain_vecs.py --wv_file path-to-glove --outputfile data/glove.hdf5
+python get_pretrain_vecs.py --glove path-to-glove --outputfile data/glove.hdf5
 --dictionary path-to-dict
 ```
 `path-to-dict` is the `*.word.dict` file created from running `preprocess.py`
