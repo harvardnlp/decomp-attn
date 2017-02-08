@@ -2,3 +2,4 @@
 *.dict
 *.hdf5
 *.txt
+*.out

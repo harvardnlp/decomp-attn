@@ -10,19 +10,25 @@ Stanford Natural Language Inference (SNLI) dataset can be downloaded from http:/
 Pre-trained GloVe embeddings can be downloaded from http://nlp.stanford.edu/projects/glove/
 
 ## Preprocessing
-
-First run:
+First we need to process the SNLI data:
 ```
-python preprocess.py --srcfile path-to-sent1-train --targetfile path-to-sent2-train
+python process-snli.py --data_filder path-to-snli-folder --out_folder path-to-output-folder
+```
+
+Then run:
+```
+python preprocess-entail.py --srcfile path-to-sent1-train --targetfile path-to-sent2-train
 --labelfile path-to-label-train --srcvalfile path-to-sent1-val --targetvalfile path-to-sent2-val
 --labelvalfile path-to-label-val --srctestfile path-to-sent1-test --targettestfile path-to-sent2-test
 --labeltestfile path-to-label-test --outputfile data/entail --glove path-to-glove
 ```
-This will create the data hdf5 files. Vocabulary is based on the pretrained Glove embeddings,
-with `path-to-glove` being the path to the pretrained Glove word vecs (i.e. the `glove.840B.300d.txt`
-file)
+Here `path-to-sent1-train` is the path to the `src-train.txt` file created from running `process-snli.py` (and `path-to-sent2-train` = `targ-train.txt`, `path-to-label-train` = `label-train.txt`, etc.)
 
-For natural language inference sent1 can be the premise and sent2 can be the hypothesis.
+`preprocess-entail.py` will create the data hdf5 files. Vocabulary is based on the pretrained Glove embeddings,
+with `path-to-glove` being the path to the pretrained Glove word vecs (i.e. the `glove.840B.300d.txt`
+file).
+
+For SNLI `sent1` is the premise and `sent1` is the hypothesis.
 
 Now run:
 ```
