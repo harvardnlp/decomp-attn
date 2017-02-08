@@ -1,6 +1,6 @@
 # Decomposable Attention Model for Sentence Pair Classification
 
-Implementation the paper [A Decomposable Attention Model for Natural Language Inference](https://arxiv.org/abs/1606.01933). Parikh et al. EMNLP 2016.
+Implementation of the paper [A Decomposable Attention Model for Natural Language Inference](https://arxiv.org/abs/1606.01933). Parikh et al. EMNLP 2016.
 
 The same model can be used for generic sentence pair classification tasks (e.g. paraphrase detection), in addition to natural language inference.
 
@@ -32,7 +32,7 @@ For SNLI `sent1` is the premise and `sent1` is the hypothesis.
 
 Now run:
 ```
-python get_pretrain_vecs.py --wv_file path-to-glove --outputfile data/glove.hdf5
+python get_pretrain_vecs.py --glove path-to-glove --outputfile data/glove.hdf5
 --dictionary path-to-dict
 ```
 `path-to-dict` is the `*.word.dict` file created from running `preprocess.py`
@@ -58,6 +58,10 @@ th predict.lua -sent1_file path-to-sent1 -sent2_file path-to-sent2 -model path-t
 ```
 This will output the predictions to `pred.txt`. `path-to-word-dict` and `path-to-label-dict` are the
 *.dict files created from running `preprocess.py`
+
+## Contact
+
+Written and maintained by <a href="http://yoon.io">Yoon Kim</a>.
 
 ## Licence
 MIT
