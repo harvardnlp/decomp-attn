@@ -28,7 +28,7 @@ Here `path-to-sent1-train` is the path to the `src-train.txt` file created from 
 with `path-to-glove` being the path to the pretrained Glove word vecs (i.e. the `glove.840B.300d.txt`
 file).
 
-For SNLI `sent1` is the premise and `sent1` is the hypothesis.
+For SNLI `sent1` is the premise and `sent2` is the hypothesis.
 
 Now run:
 ```
